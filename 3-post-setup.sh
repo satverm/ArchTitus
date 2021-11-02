@@ -9,30 +9,37 @@
 #-------------------------------------------------------------------------
 
 echo -e "\nFINAL SETUP AND CONFIGURATION"
+echo "--------------------------------------"
+echo "-- GRUB Bootloader Installation     --"
+echo "--------------------------------------"
+if [[ ! -d "/sys/firmware/efi" ]]; then
+    grub-install --boot-directory=/boot ${DISK}
+else
+    grub-install --efi-directory=/boot ${DISK}
+fi
+grub-mkconfig -o /boot/grub/grub.cfg
 
 # ------------------------------------------------------------------------
 
 echo -e "\nEnabling Login Display Manager"
-
-sudo systemctl enable sddm.service
-
+systemctl enable sddm.service
 echo -e "\nSetup SDDM Theme"
-
-sudo cat <<EOF > /etc/sddm.conf
+cat <<EOF > /etc/sddm.conf
 [Theme]
 Current=Nordic
 EOF
 
 # ------------------------------------------------------------------------
 
-echo -e "\nEnabling the cups service daemon so we can print"
+echo -e "\nEnabling essential services"
 
 systemctl enable cups.service
-sudo ntpd -qg
-sudo systemctl enable ntpd.service
-sudo systemctl disable dhcpcd.service
-sudo systemctl stop dhcpcd.service
-sudo systemctl enable NetworkManager.service
+ntpd -qg
+systemctl enable ntpd.service
+systemctl disable dhcpcd.service
+systemctl stop dhcpcd.service
+systemctl enable NetworkManager.service
+systemctl enable bluetooth
 echo "
 ###############################################################################
 # Cleaning
